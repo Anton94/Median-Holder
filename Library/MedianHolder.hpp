@@ -37,12 +37,6 @@ class MedianHolder
 	typedef std::greater<value_type> value_greater_type;
 	typedef std::less<value_type> value_less_type;
 
-#ifndef NDEBUG
-#define SLOW_MH_CHECK_INVARIANTS SlowCheckInvariants
-#else
-#define SLOW_MH_CHECK_INVARIANTS
-#endif
-
 public:
 	MedianHolder() = default;
 	MedianHolder(const MedianHolder&) = default;
@@ -52,205 +46,245 @@ public:
 	MedianHolder(MedianHolder&&) = default;
 	MedianHolder& operator=(MedianHolder&&) = default;
 
-	void insert(const value_type& element)
-	{
-		auto smallerHalfElementsSize = m_SmallerHalfElements.size();
-		auto biggerHalfElementsSize = m_BiggerHalfElements.size();
-		if (smallerHalfElementsSize + biggerHalfElementsSize <= 1)
-		{
-			InsertFirstCoupleElements(element, smallerHalfElementsSize, biggerHalfElementsSize);
-			return;
-		}
+	void insert(const value_type& element);
 
-		if (smallerHalfElementsSize < biggerHalfElementsSize)
+	median_type CalculateMedian(bool* success = nullptr) const;
+
+private:
+	const value_type& GetBiggestInSmallerHalf() const;
+
+	const value_type& GetSmallestInBiggerHalf() const;
+
+	void InsertFirstCoupleElements(const value_type& element, size_t smallerHalfElementsSize, size_t biggerHalfElementsSize);
+
+	void PushInSmallerHalf(const value_type& element);
+
+	void PushInBiggerHalf(const value_type& element);
+
+	template <class Compare>
+	void PushInHeap(std::vector<value_type>& heap, const value_type& element, Compare comp);
+
+	void MoveSmallestFromBiggerHalfToSmallerHalf();
+
+	void MoveBiggestFromSmallerHalfToBiggerHalf();
+
+	template <class CompareLeft, class CompareRight>
+	inline void MedianHolder::MoveTopFromLeftHeapToRightHeap(
+		std::vector<value_type>& leftHeap, CompareLeft leftComp,
+		std::vector<value_type>& rightHeap, CompareRight rightComp);
+
+#ifndef NDEBUG
+#define SLOW_MH_CHECK_INVARIANTS SlowCheckInvariants
+
+	void CheckHalvesSizes() const;
+
+	void SlowCheckInvariants() const;
+#else
+#define SLOW_MH_CHECK_INVARIANTS
+#endif
+private:
+	std::vector<value_type> m_SmallerHalfElements;
+	std::vector<value_type> m_BiggerHalfElements;
+};
+
+inline void MedianHolder::insert(const value_type& element)
+{
+	auto smallerHalfElementsSize = m_SmallerHalfElements.size();
+	auto biggerHalfElementsSize = m_BiggerHalfElements.size();
+	if (smallerHalfElementsSize + biggerHalfElementsSize <= 1)
+	{
+		InsertFirstCoupleElements(element, smallerHalfElementsSize, biggerHalfElementsSize);
+		return;
+	}
+
+	if (smallerHalfElementsSize < biggerHalfElementsSize)
+	{
+		if (element <= GetSmallestInBiggerHalf())
 		{
-			if (element <= GetSmallestInBiggerHalf())
-			{
-				PushInSmallerHalf(element);
-			}
-			else
-			{
-				MoveSmallestFromBiggerHalfToSmallerHalf();
-				PushInBiggerHalf(element);
-			}
-		}
-		else if (smallerHalfElementsSize > biggerHalfElementsSize)
-		{
-			if (element >= GetBiggestInSmallerHalf())
-			{
-				PushInBiggerHalf(element);
-			}
-			else
-			{
-				MoveBiggestFromSmallerHalfToBiggerHalf();
-				PushInSmallerHalf(element);
-			}
+			PushInSmallerHalf(element);
 		}
 		else
 		{
-			if (element <= GetSmallestInBiggerHalf())
-			{
-				PushInSmallerHalf(element);
-			}
-			else
-			{
-				PushInBiggerHalf(element);
-			}
+			MoveSmallestFromBiggerHalfToSmallerHalf();
+			PushInBiggerHalf(element);
 		}
-
-		SLOW_MH_CHECK_INVARIANTS();
 	}
-
-	median_type CalculateMedian(bool* success = nullptr) const
+	else if (smallerHalfElementsSize > biggerHalfElementsSize)
 	{
-		auto smallerHalfElementsSize = m_SmallerHalfElements.size();
-		auto biggerHalfElementsSize = m_BiggerHalfElements.size();
-
-		if (smallerHalfElementsSize == 0 && biggerHalfElementsSize == 0)
+		if (element >= GetBiggestInSmallerHalf())
 		{
-			if (success)
-			{
-				*success = false;
-			}
-			return median_type();
+			PushInBiggerHalf(element);
 		}
-
-		if (success)
-		{
-			*success = true;
-		}
-
-		if (smallerHalfElementsSize > biggerHalfElementsSize)
-		{
-			return median_type(m_SmallerHalfElements.back());
-		}
-
-		if (biggerHalfElementsSize > smallerHalfElementsSize)
-		{
-			return median_type(m_BiggerHalfElements.back());
-		}
-
-		return ChooseMedianOutOfTwoElements(m_SmallerHalfElements.back(), m_BiggerHalfElements.back());
-	}
-
-private:
-	const value_type& GetBiggestInSmallerHalf() const
-	{
-		return m_SmallerHalfElements.front();
-	}
-
-	const value_type& GetSmallestInBiggerHalf() const
-	{
-		return m_BiggerHalfElements.front();
-	}
-
-	void InsertFirstCoupleElements(const value_type& element, size_t smallerHalfElementsSize, size_t biggerHalfElementsSize)
-	{
-		assert(smallerHalfElementsSize + biggerHalfElementsSize <= 1);
-		assert(m_SmallerHalfElements.size() == smallerHalfElementsSize && m_BiggerHalfElements.size() == biggerHalfElementsSize);
-
-		// Note: the first element has to be in m_SmallerHalfElements.
-		if (smallerHalfElementsSize == 0)
-		{
-			assert(biggerHalfElementsSize == 0);
-			m_SmallerHalfElements.push_back(element);
-
-			SLOW_MH_CHECK_INVARIANTS();
-			return;
-		}
-
-		if (element < m_SmallerHalfElements.front())
+		else
 		{
 			MoveBiggestFromSmallerHalfToBiggerHalf();
-
+			PushInSmallerHalf(element);
+		}
+	}
+	else
+	{
+		if (element <= GetSmallestInBiggerHalf())
+		{
 			PushInSmallerHalf(element);
 		}
 		else
 		{
 			PushInBiggerHalf(element);
 		}
+	}
+
+	SLOW_MH_CHECK_INVARIANTS();
+}
+
+inline MedianHolder::median_type MedianHolder::CalculateMedian(bool* success) const
+{
+	auto smallerHalfElementsSize = m_SmallerHalfElements.size();
+	auto biggerHalfElementsSize = m_BiggerHalfElements.size();
+
+	if (smallerHalfElementsSize == 0 && biggerHalfElementsSize == 0)
+	{
+		if (success)
+		{
+			*success = false;
+		}
+		return median_type();
+	}
+
+	if (success)
+	{
+		*success = true;
+	}
+
+	if (smallerHalfElementsSize > biggerHalfElementsSize)
+	{
+		return median_type(m_SmallerHalfElements.back());
+	}
+
+	if (biggerHalfElementsSize > smallerHalfElementsSize)
+	{
+		return median_type(m_BiggerHalfElements.back());
+	}
+
+	return ChooseMedianOutOfTwoElements(m_SmallerHalfElements.back(), m_BiggerHalfElements.back());
+}
+
+inline const MedianHolder::value_type& MedianHolder::GetBiggestInSmallerHalf() const
+{
+	return m_SmallerHalfElements.front();
+}
+
+inline const MedianHolder::value_type& MedianHolder::GetSmallestInBiggerHalf() const
+{
+	return m_BiggerHalfElements.front();
+}
+
+inline void MedianHolder::InsertFirstCoupleElements(const value_type& element, size_t smallerHalfElementsSize, size_t biggerHalfElementsSize)
+{
+	assert(smallerHalfElementsSize + biggerHalfElementsSize <= 1);
+	assert(m_SmallerHalfElements.size() == smallerHalfElementsSize && m_BiggerHalfElements.size() == biggerHalfElementsSize);
+
+	// Note: the first element has to be in m_SmallerHalfElements.
+	if (smallerHalfElementsSize == 0)
+	{
+		assert(biggerHalfElementsSize == 0);
+		m_SmallerHalfElements.push_back(element);
 
 		SLOW_MH_CHECK_INVARIANTS();
+		return;
 	}
 
-	void PushInSmallerHalf(const value_type& element)
+	if (element < m_SmallerHalfElements.front())
 	{
-		PushInHeap(m_SmallerHalfElements, element, value_less_type());
-	}
+		MoveBiggestFromSmallerHalfToBiggerHalf();
 
-	void PushInBiggerHalf(const value_type& element)
+		PushInSmallerHalf(element);
+	}
+	else
 	{
-		PushInHeap(m_BiggerHalfElements, element, value_greater_type());
+		PushInBiggerHalf(element);
 	}
 
-	template <class Compare>
-	void PushInHeap(std::vector<value_type>& heap, const value_type& element, Compare comp)
-	{
-		heap.push_back(element);
-		std::push_heap(heap.begin(), heap.end(), comp);
+	SLOW_MH_CHECK_INVARIANTS();
+}
 
-		SLOW_MH_CHECK_INVARIANTS();
-	}
+inline void MedianHolder::PushInSmallerHalf(const value_type& element)
+{
+	PushInHeap(m_SmallerHalfElements, element, value_less_type());
+}
 
-	void MoveSmallestFromBiggerHalfToSmallerHalf()
-	{
-		MoveTopFromLeftHeapToRightHeap(m_BiggerHalfElements, value_greater_type(), m_SmallerHalfElements, value_less_type());
-	}
+inline void MedianHolder::PushInBiggerHalf(const value_type& element)
+{
+	PushInHeap(m_BiggerHalfElements, element, value_greater_type());
+}
 
-	void MoveBiggestFromSmallerHalfToBiggerHalf()
-	{
-		MoveTopFromLeftHeapToRightHeap(m_SmallerHalfElements, value_less_type(), m_BiggerHalfElements, value_greater_type());
-	}
+template <class Compare>
+inline void MedianHolder::PushInHeap(std::vector<value_type>& heap, const value_type& element, Compare comp)
+{
+	heap.push_back(element);
+	std::push_heap(heap.begin(), heap.end(), comp);
 
-	template <class CompareLeft, class CompareRight>
-	void MoveTopFromLeftHeapToRightHeap(std::vector<value_type>& leftHeap, CompareLeft leftComp, std::vector<value_type>& rightHeap, CompareRight rightComp)
-	{
-		assert(leftHeap.size() > 0);
+	SLOW_MH_CHECK_INVARIANTS();
+}
 
-		rightHeap.push_back(leftHeap.front());
-		std::push_heap(rightHeap.begin(), rightHeap.end(), rightComp);
+inline void MedianHolder::MoveSmallestFromBiggerHalfToSmallerHalf()
+{
+	MoveTopFromLeftHeapToRightHeap(m_BiggerHalfElements, value_greater_type(), m_SmallerHalfElements, value_less_type());
+}
 
-		std::pop_heap(leftHeap.begin(), leftHeap.end(), leftComp);
-		leftHeap.pop_back();
+inline void MedianHolder::MoveBiggestFromSmallerHalfToBiggerHalf()
+{
+	MoveTopFromLeftHeapToRightHeap(m_SmallerHalfElements, value_less_type(), m_BiggerHalfElements, value_greater_type());
+}
 
-		SLOW_MH_CHECK_INVARIANTS();
-	}
+template <class CompareLeft, class CompareRight>
+inline void MedianHolder::MoveTopFromLeftHeapToRightHeap(
+	std::vector<value_type>& leftHeap, CompareLeft leftComp,
+	std::vector<value_type>& rightHeap, CompareRight rightComp)
+{
+	assert(leftHeap.size() > 0);
+
+	rightHeap.push_back(leftHeap.front());
+	std::push_heap(rightHeap.begin(), rightHeap.end(), rightComp);
+
+	std::pop_heap(leftHeap.begin(), leftHeap.end(), leftComp);
+	leftHeap.pop_back();
+
+	SLOW_MH_CHECK_INVARIANTS();
+}
 
 #ifndef NDEBUG
-	void CheckHalvesSizes() const
+
+inline void MedianHolder::CheckHalvesSizes() const
+{
+	auto smallerHalfElementsSize = m_SmallerHalfElements.size();
+	auto biggerHalfElementsSize = m_BiggerHalfElements.size();
+
+	// alternative std::abs, but an additional include of a header file.
+	if (smallerHalfElementsSize < biggerHalfElementsSize)
 	{
-		auto smallerHalfElementsSize = m_SmallerHalfElements.size();
-		auto biggerHalfElementsSize = m_BiggerHalfElements.size();
-
-		// alternative std::abs, but an additional include of a header file.
-		if (smallerHalfElementsSize < biggerHalfElementsSize)
-		{
-			assert(biggerHalfElementsSize - smallerHalfElementsSize <= 1);
-		}
-		else
-		{
-			assert(smallerHalfElementsSize - biggerHalfElementsSize <= 1);
-		}
+		assert(biggerHalfElementsSize - smallerHalfElementsSize <= 1);
 	}
-
-	void SlowCheckInvariants() const
+	else
 	{
-		CheckHalvesSizes();
-
-		assert(std::is_heap(m_SmallerHalfElements.begin(), m_SmallerHalfElements.end()));
-
-		assert(std::is_heap(m_BiggerHalfElements.begin(), m_BiggerHalfElements.end(), value_greater_type()));
-
-		if (m_SmallerHalfElements.size() > 0 && m_BiggerHalfElements.size() > 0)
-		{
-			assert(m_SmallerHalfElements.front() <= m_BiggerHalfElements.front());
-		}
+		assert(smallerHalfElementsSize - biggerHalfElementsSize <= 1);
 	}
+}
+
+inline void MedianHolder::SlowCheckInvariants() const
+{
+	CheckHalvesSizes();
+
+	assert(std::is_heap(m_SmallerHalfElements.begin(), m_SmallerHalfElements.end()));
+
+	assert(std::is_heap(m_BiggerHalfElements.begin(), m_BiggerHalfElements.end(), value_greater_type()));
+
+	if (m_SmallerHalfElements.size() > 0 && m_BiggerHalfElements.size() > 0)
+	{
+		assert(m_SmallerHalfElements.front() <= m_BiggerHalfElements.front());
+	}
+}
+
 #endif
-private:
-	std::vector<value_type> m_SmallerHalfElements;
-	std::vector<value_type> m_BiggerHalfElements;
-#undef SLOW_MH_CHECK_INVARIANTS
-};
 
+#undef SLOW_MH_CHECK_INVARIANTS
 }
