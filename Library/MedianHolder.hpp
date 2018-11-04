@@ -162,7 +162,7 @@ inline MedianHolder::median_type MedianHolder::CalculateMedian(bool* success) co
 		return median_type(GetSmallestInBiggerHalf());
 	}
 
-	return ChooseMedianOutOfTwoElements(m_SmallerHalfElements.back(), m_BiggerHalfElements.back());
+	return ChooseMedianOutOfTwoElements(GetBiggestInSmallerHalf(), GetSmallestInBiggerHalf());
 }
 
 inline const MedianHolder::value_type& MedianHolder::GetBiggestInSmallerHalf() const
