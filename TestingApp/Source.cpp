@@ -7,7 +7,7 @@ namespace MH
 {
 
 // All tests are testing the median of a sequence of numbers.
-// The median is calculated after each insertion of a number from the sequence.
+// The median is calculated after each insertion of a number.
 
 void ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(const std::vector<int>& numbers, const std::vector<float>& expectedMedians)
 {
@@ -40,7 +40,7 @@ TEST_CASE("Empty sequence")
 TEST_CASE("Two opposite numbers in increasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ 10, -10 },
+		std::vector<int>{   10,   -10 },
 		std::vector<float>{ 10.f, 0.f }
 	);
 }
@@ -48,7 +48,7 @@ TEST_CASE("Two opposite numbers in increasing order")
 TEST_CASE("Two opposite numbers in decreasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ -10, 10 },
+		std::vector<int>{   -10,   10 },
 		std::vector<float>{ -10.f, 0.f }
 	);
 }
@@ -56,7 +56,7 @@ TEST_CASE("Two opposite numbers in decreasing order")
 TEST_CASE("Three negative numbers in increasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ -112, -110 , -10},
+		std::vector<int>{   -112,   -110 ,  -10},
 		std::vector<float>{ -112.f, -111.f, -110.f }
 	);
 }
@@ -64,7 +64,7 @@ TEST_CASE("Three negative numbers in increasing order")
 TEST_CASE("Three negative numbers in decreasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ -10, -110 , -112},
+		std::vector<int>{   -10,   -110 ,  -112 },
 		std::vector<float>{ -10.f, -60.f , -110.f }
 	);
 }
@@ -72,7 +72,7 @@ TEST_CASE("Three negative numbers in decreasing order")
 TEST_CASE("Three positive numbers in increasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ 0, 1210 , 2390},
+		std::vector<int>{   0, 1210 , 2390 },
 		std::vector<float>{ 0, 605.f, 1210.f }
 	);
 }
@@ -80,12 +80,12 @@ TEST_CASE("Three positive numbers in increasing order")
 TEST_CASE("Three positive numbers in decreasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ 2390, 1210, 0 },
+		std::vector<int>{   2390,   1210,   0 },
 		std::vector<float>{ 2390.f, 1800.f, 1210.f }
 	);
 }
 
-TEST_CASE("Sequence of numbers with same value")
+TEST_CASE("Repeating the same value")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
 		std::vector<int>(100, 42),
@@ -93,7 +93,7 @@ TEST_CASE("Sequence of numbers with same value")
 	);
 }
 
-TEST_CASE("Sequence of numbers with only two values (successively)")
+TEST_CASE("Numbers, repeating two values (successively first the one value, then the other)")
 {
 	std::vector<int> numbers(50, 42);
 	numbers.insert(numbers.end(), 60, -42);
@@ -105,30 +105,29 @@ TEST_CASE("Sequence of numbers with only two values (successively)")
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(numbers, expectedMedians);
 }
 
-TEST_CASE("Sequence of sequentional numbers increasing order")
+TEST_CASE("Numbers in increasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+		std::vector<int>{   0,   1,    2,   3,    4,   5,    6,   7,    8,   9,    10 },
 		std::vector<float>{ 0.f, 0.5f, 1.f, 1.5f, 2.f, 2.5f, 3.f, 3.5f, 4.f, 4.5f, 5.f }
 	);
 }
 
-TEST_CASE("Sequence of sequentional numbers decreasing order")
+TEST_CASE("Numbers in decreasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
-		std::vector<int>{ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 },
-		std::vector<float>{ 0.f, 0.5f, 1.f, 1.5f, 2.f, 2.5f, 3.f, 3.5f, 4.f, 4.5f, 5.f }
+		std::vector<int>{   10,   9,    8,   7,    6,   5,    4,   3,    2,   1,    0 },
+		std::vector<float>{ 10.f, 9.5f, 9.f, 8.5f, 8.f, 7.5f, 7.f, 6.5f, 6.f, 5.5f, 5.f }
 	);
 }
 
-TEST_CASE("Forcing the median holder structure's halves to reorganize #000")
+TEST_CASE("Numbers in increasing then decreasing order")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
 		std::vector<int>{   1,   2,    3,   9,    9,   9,   9,   0,   -1,  -2,   -3,  -4,   -5,  -6,   -7,  -8 },
 		std::vector<float>{ 1.f, 1.5f, 2.f, 2.5f, 3.f, 6.f, 9.f, 6.f, 3.f, 2.5f, 2.f, 1.5f, 1.f, 0.5f, 0.f, -0.5f }
 	);
 }
-
 
 /*
 	TODO: add fuzz tests.
