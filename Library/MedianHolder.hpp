@@ -52,20 +52,17 @@ public:
 
 private:
 	const value_type& GetBiggestInSmallerHalf() const;
-
 	const value_type& GetSmallestInBiggerHalf() const;
 
 	void InsertFirstCoupleElements(const value_type& element, size_t smallerHalfElementsSize, size_t biggerHalfElementsSize);
 
 	void PushInSmallerHalf(const value_type& element);
-
 	void PushInBiggerHalf(const value_type& element);
 
 	template <class Compare>
 	void PushInHeap(std::vector<value_type>& heap, const value_type& element, Compare comp);
 
 	void MoveSmallestFromBiggerHalfToSmallerHalf();
-
 	void MoveBiggestFromSmallerHalfToBiggerHalf();
 
 	template <class CompareLeft, class CompareRight>
@@ -157,12 +154,12 @@ inline MedianHolder::median_type MedianHolder::CalculateMedian(bool* success) co
 
 	if (smallerHalfElementsSize > biggerHalfElementsSize)
 	{
-		return median_type(m_SmallerHalfElements.back());
+		return median_type(GetBiggestInSmallerHalf());
 	}
 
 	if (biggerHalfElementsSize > smallerHalfElementsSize)
 	{
-		return median_type(m_BiggerHalfElements.back());
+		return median_type(GetSmallestInBiggerHalf());
 	}
 
 	return ChooseMedianOutOfTwoElements(m_SmallerHalfElements.back(), m_BiggerHalfElements.back());
