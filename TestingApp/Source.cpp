@@ -90,4 +90,16 @@ TEST_CASE("Median of sequence of numbers with same value")
 	);
 }
 
+TEST_CASE("Median of sequence of numbers with only two values (successively)")
+{
+	std::vector<int> sequence(50, 42);
+	sequence.insert(sequence.end(), 60, -42);
+
+	std::vector<float> expectedMedians(99, 42.f);
+	expectedMedians.push_back(0.f);
+	expectedMedians.insert(expectedMedians.end(), 10, -42.f);
+
+	ExecuteSequenceOfNumbersTest(sequence, expectedMedians);
+}
+
 }
