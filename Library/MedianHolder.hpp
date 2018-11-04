@@ -71,13 +71,13 @@ private:
 		std::vector<value_type>& rightHeap, CompareRight rightComp);
 
 #ifndef NDEBUG
-#define SLOW_MH_CHECK_INVARIANTS SlowCheckInvariants
+#define SLOW_MH_CHECK_INVARIANTS() SlowCheckInvariants
 
 	void CheckHalvesSizes() const;
 
 	void SlowCheckInvariants() const;
 #else
-#define SLOW_MH_CHECK_INVARIANTS
+#define SLOW_MH_CHECK_INVARIANTS()
 #endif
 private:
 	std::vector<value_type> m_SmallerHalfElements;
