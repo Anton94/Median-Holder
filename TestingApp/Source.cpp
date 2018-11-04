@@ -24,7 +24,7 @@ void ExecuteSequenceOfNumbersTest(const std::vector<int>& sequence, const std::v
 	}
 }
 
-TEST_CASE("Check median of no numbers")
+TEST_CASE("Median of no numbers")
 {
 	MedianHolder medianHolder;
 	bool calculated = false;
@@ -34,7 +34,7 @@ TEST_CASE("Check median of no numbers")
 	REQUIRE_FALSE(calculated);
 }
 
-TEST_CASE("Check median of two opposite numbers in increasing order")
+TEST_CASE("Median of two opposite numbers in increasing order")
 {
 	ExecuteSequenceOfNumbersTest(
 		std::vector<int>{ 10, -10 },
@@ -42,7 +42,7 @@ TEST_CASE("Check median of two opposite numbers in increasing order")
 	);
 }
 
-TEST_CASE("Check median of two opposite numbers in decreasing order")
+TEST_CASE("Median of two opposite numbers in decreasing order")
 {
 	ExecuteSequenceOfNumbersTest(
 		std::vector<int>{ -10, 10 },
@@ -50,39 +50,39 @@ TEST_CASE("Check median of two opposite numbers in decreasing order")
 	);
 }
 
-TEST_CASE("Check median of two negative numbers in increasing order")
+TEST_CASE("Median of three negative numbers in increasing order")
 {
 	ExecuteSequenceOfNumbersTest(
-		std::vector<int>{ -110, -10 },
-		std::vector<float>{ -110.f, -60.f }
+		std::vector<int>{ -112, -110 , -10},
+		std::vector<float>{ -112.f, -111.f, -110.f }
 	);
 }
 
-TEST_CASE("Check median of two negative numbers in decreasing order")
+TEST_CASE("Median of three negative numbers in decreasing order")
 {
 	ExecuteSequenceOfNumbersTest(
-		std::vector<int>{ -10, -110 },
-		std::vector<float>{ -10.f, -60.f }
+		std::vector<int>{ -10, -110 , -112},
+		std::vector<float>{ -10.f, -60.f , -110.f }
 	);
 }
 
-TEST_CASE("Check median of two positive numbers in increasing order")
+TEST_CASE("Median of three positive numbers in increasing order")
 {
 	ExecuteSequenceOfNumbersTest(
-		std::vector<int>{ 1210, 0 },
-		std::vector<float>{ 1210.f, 605.f }
+		std::vector<int>{ 0, 1210 , 2390},
+		std::vector<float>{ 0, 605.f, 1210.f }
 	);
 }
 
-TEST_CASE("Check median of two positive numbers in decreasing order")
+TEST_CASE("Median of three positive numbers in decreasing order")
 {
 	ExecuteSequenceOfNumbersTest(
-		std::vector<int>{ 0, 1210 },
-		std::vector<float>{ 0, 605.f }
+		std::vector<int>{ 2390, 1210, 0 },
+		std::vector<float>{ 2390.f, 1800.f, 1210.f }
 	);
 }
 
-TEST_CASE("Check median of sequence of numbers with same value")
+TEST_CASE("Median of sequence of numbers with same value")
 {
 	ExecuteSequenceOfNumbersTest(
 		std::vector<int>(100, 42),
