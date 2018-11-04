@@ -85,6 +85,14 @@ TEST_CASE("Three positive numbers in decreasing order")
 	);
 }
 
+TEST_CASE("Numbers which are not forcing the median holder's halves to swap values")
+{
+	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
+		std::vector<int>{   -10, 10, -20, 20, -30, 30, 40, -40},
+		std::vector<float>{ -10.f, 0.f, -10.f, 0.f, -10.f, 0.f, 10.f, 0.f}
+	);
+}
+
 TEST_CASE("Repeating the same value")
 {
 	ExecuteSequenceOfNumberInsertionAndMedianCalculationTest(
