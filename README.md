@@ -1,7 +1,7 @@
 # Median-Holder
 A data structure with two fast operations: insertion of a number and getting the median of all inserted numbers.
 
-It is a header-only library.
+It is a header-only library located in the `Library` subdirectory.
 
 I presume that the numbers are integers and that the insertion and getting the median operations are called with the same order of magnitude.
 
@@ -12,6 +12,8 @@ Time complexity:
 Space complexity is `0(N)`
 
 (`N` is the count of inserted numbers)
+
+Note that in `Debug` there are going to be slow invariant asserts.
 
 # Building
 For build system, I am using CMake.
